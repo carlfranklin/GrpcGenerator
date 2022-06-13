@@ -1,6 +1,6 @@
 # GrpcGenerator
 
-GrpcGenerator is a .NET Core 5 console app that demonstrates the **GrpcWizard** library, which generates a complete gRPC infrastructure for a hosted Blazor WebAssembly application from a simple service and an interface. Each method in the service must define an input type and return a Task of an output type. 
+GrpcGenerator is a .NET 6 console app that demonstrates the **GrpcWizard** library, which generates a complete gRPC infrastructure for a hosted Blazor WebAssembly application from a simple service and an interface. Each method in the service must define an input type and return a Task of an output type. 
 
 You will end up with a client-side service that uses .NET types.
 
