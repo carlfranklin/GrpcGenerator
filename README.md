@@ -1,24 +1,22 @@
 # GrpcGenerator
 
-GrpcGenerator is a .NET Core 7 console app that demonstrates the **GrpcWizard** library, which generates a complete gRPC infrastructure for a hosted Blazor WebAssembly application from a simple service and an interface. Each method in the service must define an input type and return a Task of an output type. 
-
-You will end up with a client-side service that uses .NET types.
-
-Conversion to and from gRPC message types is done automatically.
+GrpcGenerator is a .NET Core 7 console app that demonstrates the **GrpcWizard** library, which generates a complete gRPC infrastructure for a hosted Blazor WebAssembly application from a simple service and an interface. Each method in the service must define an input type and return a Task of an output type. You will end up with a client-side service that uses your own C# classes. Conversion to and from gRPC.NET  generated objects is done automatically.
 
 The wizard will generate:
 
 - a proto file
-- converter class files to convert gRPC message types to .NET class types and vice-versa
-- one or more gRPC server-side services that call into your c# service 
-- client-side services that calls the gRPC service, converting types automatically
-- a README.txt file with instructions, markup, and code to add to your projects
+- converter class files to convert gRPC.NET generated objects to .NET objects and vice-versa
+- one or more gRPC server-side services that call into your C# service 
+- client-side services that call the gRPC service, converting types automatically
+- a README.txt file with markup and code, as well as instructions for adding them to your projects
 
 ## Why do we need this?
 
 Why do we need a code generator for a code generator? gRPC for .NET ***is*** a code generator, after all.
 
-gRPC demands that you define your classes used as data transfer objects (DTOs) as protobuf messages. These messages are used by gRPC.NET to generate classes behind the scenes. That may be fine for greenfield (new) projects, but if you plan to use gRPC in an existing project in which you've already defined your models in C#, you'll have to re-create all those model files as protobuf messages. The *.proto* file becomes the place where changes are made to your models and services. Wouldn't it be great if we could start with C# models and services, and just generate the .proto file and all of the other files required to use gRPC?
+gRPC demands that you define your data transfer objects (DTOs) as protobuf messages. These messages are used by gRPC.NET to generate C# classes behind the scenes. That may be fine for greenfield (new) projects, but if you plan to use gRPC in an existing project in which you've already defined your models in C#, you'll have to re-create all those model files as protobuf messages. The *.proto* file becomes the place where changes are made to your models and services. Wouldn't it be great if we could start with C# models and services, and just generate the .proto file and all of the other files required to use gRPC?
+
+> :point_up: I use the term **Model** and **DTO** interchangably.
 
 As an example, here's a simple model class you might use as a DTO:
 
@@ -47,9 +45,9 @@ message Grpc_Person {
 }
 ```
 
-This isn't so hard when you're building a new project. Instead of creating C# model/DTO classes, you create them as protobuf messages, and the gRPC.NET code generator does the rest. 
+This isn't so hard when you're building a new project. Instead of creating C# mode classes, you create them as protobuf messages, and the gRPC.NET code generator does the rest. 
 
-**GrpcGenerator** allows you to define both your models and services in C# where they can be tested. By adding another layer, you can use the same C# models and services in your code that you started with. Converter classes are generated to convert protobuf message types into C# types and vice-versa. Conversion code is also generated where needed.
+**GrpcGenerator** allows you to define both your models and services in C# where they can be tested. By adding another layer, you can use the same C# models and services in your code that you started with. Converter classes are generated to convert gRPC.NET generated objects into C# objects and vice-versa. 
 
 ## Using GrpcGenerator
 
@@ -67,7 +65,7 @@ This is a **Console App** project where you define your models and services, tes
 
 The **GrpcGenerator** project has two folders where you add your basic model and service code: ***Models*** and ***Services***.
 
-Let's take a look at the *Models/Person.cs* file:
+Let's take a look at the *Models/Person.cs* file included with the project:
 
 ```c#
 using GrpcWizardLibrary;
@@ -121,13 +119,13 @@ public class PeopleResponse
 }
 ```
 
-This file contains the `Person` class, and also all of the support classes for using the service.
+This file contains the `Person` class, and also all of the  `*Request` and `*Response` classes used by the service.
 
 The `Person` class is a model, and therefore must be decorated with the `[GrpcModel]` attribute, so the generator identifies it correctly.
 
 The reason for all of the `*Request` and `*Response` classes is because gRPC service remote procedures have exactly one input type and one output type. Even if there is no input required, as is the case with `GetAllPeopleRequest`, you still have to define an empty class and use it as an input.
 
-The `*Request` and `*Response` classes are shared between the client and server, and will therefore reside in the `Shared` project. The easiest way to achieve this is to add them to the model classes.
+The `*Request` and `*Response` classes are shared between the client and server, and will therefore reside in the `Shared` project. The easiest way to achieve this is to add them to the model C# files.
 
 Take a look at *Services/PeopleService.cs*:
 
@@ -210,6 +208,8 @@ public class PeopleService : IPeopleService
 }
 ```
 
+**Service Conventions:**
+
 Check out the attribute:
 
 ```c#
@@ -249,11 +249,9 @@ public interface IPeopleProductsService
 
 Simply list all of the model types that the service is using in the attribute declaration.
 
-##### Service Conventions:
-
 Service names must end with "Service", and must implement an Interface named with an "I" followed by the Service name:
 
-Examples:
+Here is a list of the included services with their interface names:
 
 | Service Name            | Interface Name           |
 | ----------------------- | ------------------------ |
@@ -261,9 +259,9 @@ Examples:
 | `ProductService`        | `IProductService`        |
 | `PeopleProductsService` | `IPeopleProductsService` |
 
-The demo shows basic CRUD operations, but you are not limited to that. You can create any kind of service that uses one or more models. You only need to create Request and Response classes to support them.
+The demo shows basic CRUD operations (except for Updates), but you are not limited to that. You can create any kind of service that uses one or more models. You only need to create Request and Response classes to support them.
 
-> :point_up: **Note**: When adding C# model and service files to the *Models* and *Services* folder, be sure to set their `Copy to Output Directory` property to  `Copy if `newer` or they will not be included in the generated files.
+> :point_up: **Note**: When adding C# model and service files to the *Models* and *Services* folder, be sure to set their `Copy to Output Directory` property to  `Copy if newer` or they will not be included in the generated files.
 
 ### Testing Models and Services
 
@@ -366,7 +364,7 @@ If you wish to overwrite the files in an existing hosted Blazor WebAssembly app,
 string outputFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\Output\\BlazorGrpcGenerated\\BlazorGrpcGenerated\\";
 ```
 
-Now, every time you run the generator, it will overwrite the files in your output folders, deleting the existing files.
+Now, every time you run the generator, it will overwrite the files in your solution's *Client*, *Server*, and *Shared* project folders, deleting the existing files in the custom *Grpc*(*) folders.
 
 ### Generating Files
 
@@ -386,7 +384,7 @@ Console.WriteLine(result);
 
 ### Demo Models and Services
 
-If you simply run **GrpcGenerator** as is, it will generate support files for two models (`Person` and `Product`) and three services (`PeopleService`, `ProductService`, and `PeopleProductsService`) and place them in a folder called *Output* on your Windows Desktop. It will also generate a *README.txt* file that has markup, and code along with instructions as to what to add to your project.
+If you simply run **GrpcGenerator** as is, it will generate support files for two models (`Person` and `Product`) and three services (`PeopleService`, `ProductService`, and `PeopleProductsService`) and place them in a folder called *Output* on your Windows Desktop. It will also generate a *README.txt* file that has markup and code along with instructions as to what to add to your project.
 
 Go ahead and run **GrpcGenerator**, and then we will create a new hosted Blazor WebAssembly solution with Visual Studio, and add the files to it.
 
@@ -433,7 +431,7 @@ Add the following to the Shared project *.csproj* file:
 
 > :point_up: Make sure to save after adding package references
 
-Add all the generated files from the Shared folder to the Shared project.
+Copy all the generated files from the Shared folder to the Shared project.
 
 ![image-20230613115630990](images/image-20230613115630990.png)
 
@@ -448,7 +446,7 @@ Add the following to the Server project *.csproj* file:
 
 > :point_up: Make sure to save after adding package references
 
-Add all the generated files from the Server folder to the Server project.
+Copy all the generated files from the Server folder to the Server project.
 
 ![image-20230613115826590](images/image-20230613115826590.png)
 
@@ -461,6 +459,8 @@ builder.Services.AddSingleton<PeopleService>();
 builder.Services.AddSingleton<ProductsService>();
 ```
 
+These are your service files (minus the attributes). 
+
 Add the following to the Server project *Program.cs* file after `app.UseRouting();`:
 
 ```c#
@@ -469,6 +469,8 @@ app.MapGrpcService<Grpc_PeopleProductsService>().EnableGrpcWeb();
 app.MapGrpcService<Grpc_PeopleService>().EnableGrpcWeb();
 app.MapGrpcService<Grpc_ProductsService>().EnableGrpcWeb();
 ```
+
+These are the gRPC.NET generated files that will handle requests and forward them to your services, making conversions in both directions.
 
 Add the following to the Client project .csproj file:
 
@@ -480,7 +482,7 @@ Add the following to the Client project .csproj file:
 
 > :point_up: Make sure to save after adding package references
 
-Add all the generated files from the Client folder to the Client project.
+Copy all the generated files from the Client folder to the Client project.
 
 ![image-20230613120135222](images/image-20230613120135222.png)
 
@@ -515,6 +517,10 @@ builder.Services.AddScoped<PeopleProductsClient>();
 builder.Services.AddScoped<PeopleClient>();
 builder.Services.AddScoped<ProductsClient>();
 ```
+
+The first three Singletons are the gRPC.NET generated clients.
+
+The last three lines add the GrpcWizard-generated clients. These call into the gRPC.NET generated clients making the required conversions in both directions.
 
 Add the following @using statement to the Client project *_Imports.razor* file:
 
@@ -554,6 +560,7 @@ Here are four sample *Index.razor* pages:
 
     async Task GetAllButton_Clicked()
     {
+        People.Clear();
         var result = await PeopleClient.GetAllAsync(new GetAllPeopleRequest());
         People.AddRange(result.People);
     }
@@ -589,9 +596,9 @@ public class PeopleClient
 
 PeopleClient is generated by **GrpcGenerator**.
 
-It injects the gRPC.NET Generated`Grpc_People.Grpc_PeopleClient` and uses that to make the actual calls to the server service.
+It injects the gRPC.NET generated `Grpc_People.Grpc_PeopleClient` and uses that to make the actual calls to the server service.
 
-However, the request must be converted first from our C# type to a protobuf message type using the **GrpcGenerator** generated converter class:
+However, the request must be converted first from our C# object to a gRPC.NET generated object using the **GrpcGenerator** generated converter class:
 
 ```c#
 var getAllPeopleRequest = GetAllPeopleRequestConverter.FromGetAllPeopleRequest(request);
@@ -1048,3 +1055,8 @@ This last sample adds code and markup for the `PeopleProductsService`:
 ```
 
 ![image-20230613124216911](images/image-20230613124216911.png)
+
+As an exercise, try adding the ability to update a `Person`. It all happens in the `PeopleService`. Re-generate the code, using your project folder as the output folder. You should then be able to add UI and code to *Index.razor* to update.
+
+Please consider supporting this project. See an issue? Have ideas for improvement? Make a pull request.
+

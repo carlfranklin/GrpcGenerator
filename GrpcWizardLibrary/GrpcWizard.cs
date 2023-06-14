@@ -695,6 +695,7 @@ public static class GrpcWizard
         indexSb.AppendLine("");
         indexSb.AppendLine("    async Task GetAllButton_Clicked()");
         indexSb.AppendLine("    {");
+        indexSb.AppendLine($"        People.Clear();");
         indexSb.AppendLine($"        var result = await PeopleClient.GetAllAsync(new GetAllPeopleRequest());");
         indexSb.AppendLine($"        People.AddRange(result.People);");
         indexSb.AppendLine("    }");
